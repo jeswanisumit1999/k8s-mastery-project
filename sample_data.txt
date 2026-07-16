@@ -9,3 +9,13 @@ INSERT INTO items (name, description) VALUES
   ('Widget B', 'A slightly better widget'),
   ('Gadget X', 'An advanced gadget');
 "
+
+
+# buid image and send to node 1
+
+docker build -t k8s-demo-backend:v1 .
+docker save -o k8s-demo-backend.tar k8s-demo-backend:v1
+ls -lh k8s-demo-backend.tar
+scp k8s-demo-backend.tar node01:/root/
+ssh node01
+ctr -n k8s.io images import /root/k8s-demo-backend.tar
