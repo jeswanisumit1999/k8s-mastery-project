@@ -13,7 +13,7 @@ spec:
     imagePullPolicy: Never
     env:
     - name: DB_HOST
-      value: "<POSTGRES_POD_IP>"     # replace with the IP from step 1
+      value: "<POSTGRES_POD_IP>"     # replace with the DB pod IP
     - name: DB_NAME
       value: "itemsdb"
     - name: DB_USER
