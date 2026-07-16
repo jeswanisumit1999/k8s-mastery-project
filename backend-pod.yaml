@@ -11,5 +11,14 @@ spec:
   - name: backend
     image: docker.io/library/k8s-demo-backend:v1
     imagePullPolicy: Never
+    env:
+    - name: DB_HOST
+      value: "<POSTGRES_POD_IP>"     # replace with the IP from step 1
+    - name: DB_NAME
+      value: "itemsdb"
+    - name: DB_USER
+      value: "postgres"
+    - name: DB_PASSWORD
+      value: "postgres"
     ports:
     - containerPort: 3000
