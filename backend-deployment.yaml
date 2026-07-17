@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node01
+      containers:
+      - name: backend
+        image: docker.io/library/k8s-demo-backend:v1
+        imagePullPolicy: Never
+        env:
+        - name: DB_HOST
+          value: "postgres-pod-ip-placeholder"         ## update ip here
+        - name: DB_NAME
+          value: "itemsdb"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          value: "postgres"
+        ports:
+        - containerPort: 3000
