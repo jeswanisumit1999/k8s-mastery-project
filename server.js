@@ -62,3 +62,8 @@ app.post('/items', async (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend API listening on port ${PORT}`);
 });
+
+// Liveness — process-only check, never touches external dependencies
+app.get('/livez', (req, res) => {
+  res.status(200).json({ status: 'alive' });
+});
