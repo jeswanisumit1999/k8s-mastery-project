@@ -5,6 +5,8 @@ metadata:
   namespace: dev
   labels:
     app: backend
+    env: dev
+    version: v1
 spec:
   replicas: 2
   selector:
@@ -14,6 +16,8 @@ spec:
     metadata:
       labels:
         app: backend
+        env: dev
+        version: v1
     spec:
       nodeSelector:
         kubernetes.io/hostname: node01
@@ -21,14 +25,21 @@ spec:
       - name: backend
         image: docker.io/library/k8s-demo-backend:v1
         imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: backend-config
         env:
-        - name: DB_HOST
-          value: "postgres-pod-ip-placeholder"         ## update ip here
-        - name: DB_NAME
-          value: "itemsdb"
-        - name: DB_USER
-          value: "postgres"
         - name: DB_PASSWORD
-          value: "postgres"
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: DB_PASSWORD
         ports:
         - containerPort: 3000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
