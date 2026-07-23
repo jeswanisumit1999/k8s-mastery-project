@@ -10,6 +10,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'itemsdb',
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
+  connectionTimeoutMillis: 2000,
 });
 
 app.use(express.json());
