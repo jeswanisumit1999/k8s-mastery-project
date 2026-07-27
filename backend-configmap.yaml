@@ -4,6 +4,6 @@ metadata:
   name: backend-config
   namespace: dev
 data:
-  DB_HOST: "192.168.1.68"
+  DB_HOST: "postgres-0.postgres.dev.svc.cluster.local"
   DB_NAME: "itemsdb"
   DB_USER: "postgres"
