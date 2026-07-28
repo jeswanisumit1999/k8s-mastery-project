@@ -13,8 +13,15 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
+// Prevents a downed/flaky DB connection from crashing the whole Node process.
+// Do NOT process.exit() here — let the readiness probe handle routing instead.
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client:', err.message);
+});
+
 app.use(express.json());
 
+// Readiness — allowed to depend on the DB. Failing here just stops traffic routing.
 app.get('/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -24,8 +31,13 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Liveness — process-only check, never touches external dependencies.
+app.get('/livez', (req, res) => {
+  res.status(200).json({ status: 'alive' });
+});
+
 app.get('/', (req, res) => {
-  res.json({ message: 'Backend API is running', endpoints: ['/health', '/items', '/items/:id'] });
+  res.json({ message: 'Backend API is running', endpoints: ['/health', '/livez', '/items', '/items/:id'] });
 });
 
 app.get('/items', async (req, res) => {
@@ -62,9 +74,4 @@ app.post('/items', async (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend API listening on port ${PORT}`);
-});
-
-// Liveness — process-only check, never touches external dependencies
-app.get('/livez', (req, res) => {
-  res.status(200).json({ status: 'alive' });
 });
