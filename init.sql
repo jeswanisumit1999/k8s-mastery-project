@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS items (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description TEXT
+);
+
+INSERT INTO items (name, description) VALUES
+  ('Widget A', 'A basic widget'),
+  ('Widget B', 'A slightly better widget'),
+  ('Gadget X', 'An advanced gadget');
