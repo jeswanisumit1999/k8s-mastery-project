@@ -31,6 +31,13 @@ spec:
           value: /var/lib/postgresql/data/pgdata   # subdir avoids lost+found init failure
         ports:
         - containerPort: 5432
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
