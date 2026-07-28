@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: dev
+spec:
+  schedule: "*/5 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: backup
+            image: postgres:16-alpine
+            env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DB_PASSWORD
+            command:
+            - sh
+            - -c
+            - |
+              echo "Starting backup at $(date)"
+              pg_dump -h postgres-0.postgres.dev.svc.cluster.local -U postgres -d itemsdb > /tmp/backup-$(date +%s).sql
+              echo "Backup finished, row count check:"
+              psql -h postgres-0.postgres.dev.svc.cluster.local -U postgres -d itemsdb -c "SELECT count(*) FROM items;"
