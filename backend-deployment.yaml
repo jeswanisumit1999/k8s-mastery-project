@@ -7,6 +7,10 @@ metadata:
     app: backend
     env: dev
     version: v1
+  annotations:
+    owner: "your-name"
+    description: "Backend API for K8s mastery project"
+    repo: "https://github.com/jeswanisumit1999/k8s-mastery-project"
 spec:
   replicas: 2
   selector:
@@ -21,6 +25,24 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: node01
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:16-alpine
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: DB_PASSWORD
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-0.postgres.dev.svc.cluster.local -U postgres; do
+            echo "Waiting for postgres to be ready..."
+            sleep 2
+          done
+          echo "Postgres is ready — starting backend"
       containers:
       - name: backend
         image: docker.io/library/k8s-demo-backend:v1
