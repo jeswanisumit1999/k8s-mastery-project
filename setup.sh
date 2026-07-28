@@ -49,7 +49,7 @@ kubectl apply -f dev-quota.yaml
 
 # Config/secrets before anything that consumes them
 kubectl apply -f backend-configmap.yaml
-kubectl apply -f backend-secret.yaml
+kubectl apply -f backend-secrets.yaml
 
 # Storage before the StatefulSet that claims it
 kubectl apply -f postgres-pvc.yaml
