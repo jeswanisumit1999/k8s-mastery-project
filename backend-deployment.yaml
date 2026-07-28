@@ -8,7 +8,7 @@ metadata:
     env: dev
     version: v1
   annotations:
-    owner: "your-name"
+    owner: "Sumit Jeswani"
     description: "Backend API for K8s mastery project"
     repo: "https://github.com/jeswanisumit1999/k8s-mastery-project"
 spec:
