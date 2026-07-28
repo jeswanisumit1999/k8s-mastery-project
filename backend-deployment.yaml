@@ -43,6 +43,13 @@ spec:
             sleep 2
           done
           echo "Postgres is ready — starting backend"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
       containers:
       - name: backend
         image: docker.io/library/k8s-demo-backend:v1
