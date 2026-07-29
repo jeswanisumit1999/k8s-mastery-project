@@ -65,6 +65,9 @@ kubectl rollout status statefulset/postgres -n dev --timeout=120s
 kubectl apply -f backend-deployment.yaml
 kubectl rollout status deployment/backend -n dev --timeout=120s
 
+# Backend Service
+kubectl apply -f backend-service.yaml
+
 # Supporting ops workloads
 kubectl apply -f node-exporter-daemonset.yaml
 kubectl apply -f postgres-backup-cronjob.yaml
@@ -87,8 +90,13 @@ SELECT * FROM (VALUES
 WHERE NOT EXISTS (SELECT 1 FROM items);
 "
 
+# Frontend
+kubectl apply -f frontend-deployment.yaml
+kubectl apply -f frontend-service.yaml
+
 echo "=================================================="
 echo "== Done. Current state: =="
 echo "=================================================="
 kubectl get all -n dev
 kubectl get pvc -n dev
+
