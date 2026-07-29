@@ -94,6 +94,9 @@ WHERE NOT EXISTS (SELECT 1 FROM items);
 kubectl apply -f frontend-deployment.yaml
 kubectl apply -f frontend-service.yaml
 
+# Ingress
+kubectl apply -f app-ingress.yaml
+
 echo "=================================================="
 echo "== Done. Current state: =="
 echo "=================================================="
