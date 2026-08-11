@@ -40,41 +40,48 @@ echo "=================================================="
 kubectl create namespace dev --dry-run=client -o yaml | kubectl apply -f -
 
 echo "=================================================="
-echo "== 6. Apply manifests in dependency order =="
+echo "== 6. Install Helm if missing =="
+echo "=================================================="
+if ! command -v helm &> /dev/null; then
+  curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+fi
+helm version
+
+echo "=================================================="
+echo "== 7. Clean up any leftover unmanaged resources =="
+echo "== (Helm refuses to adopt resources it didn't create) =="
+echo "=================================================="
+kubectl delete secret backend-secret -n dev --ignore-not-found
+kubectl delete configmap backend-config -n dev --ignore-not-found
+kubectl delete resourcequota dev-quota -n dev --ignore-not-found
+kubectl delete pvc postgres-pvc -n dev --ignore-not-found
+kubectl delete statefulset postgres -n dev --ignore-not-found
+kubectl delete deployment backend frontend -n dev --ignore-not-found
+kubectl delete svc backend-service frontend-service postgres -n dev --ignore-not-found
+kubectl delete cronjob postgres-backup -n dev --ignore-not-found
+kubectl delete jobs -n dev --all --ignore-not-found
+echo "Waiting for old pods to fully terminate..."
+kubectl wait --for=delete pod -l app=backend -n dev --timeout=60s 2>/dev/null || true
+kubectl wait --for=delete pod -l app=postgres -n dev --timeout=60s 2>/dev/null || true
+
+echo "=================================================="
+echo "== 8. Deploy via Helm (idempotent: installs or upgrades) =="
 echo "=================================================="
 cd "$PROJECT_DIR"
+helm upgrade --install taskapp ./taskapp --namespace dev --wait --timeout 3m
+helm list -n dev
 
-# Quota first, so nothing sneaks in unbounded
-kubectl apply -f dev-quota.yaml
-
-# Config/secrets before anything that consumes them
-kubectl apply -f backend-configmap.yaml
-kubectl apply -f backend-secrets.yaml
-
-# Storage before the StatefulSet that claims it
-kubectl apply -f postgres-pvc.yaml
-
-# DB identity + workload before backend (init container depends on DB being reachable)
-kubectl apply -f postgres-headless-svc.yaml
-kubectl apply -f postgres-statefulset.yaml
-
-echo "Waiting for postgres-0 to be ready before deploying backend..."
-kubectl rollout status statefulset/postgres -n dev --timeout=120s
-
-# Backend
-kubectl apply -f backend-deployment.yaml
-kubectl rollout status deployment/backend -n dev --timeout=120s
-
-# Backend Service
-kubectl apply -f backend-service.yaml
-
-# Supporting ops workloads
+echo "=================================================="
+echo "== 8b. Apply extras not yet in the Helm chart =="
+echo "== (node-exporter DaemonSet, backup CronJob) =="
+echo "=================================================="
 kubectl apply -f node-exporter-daemonset.yaml
 kubectl apply -f postgres-backup-cronjob.yaml
 
 echo "=================================================="
-echo "== 7. Load seed data (only if items table is empty) =="
+echo "== 9. Load seed data (only if items table is empty) =="
 echo "=================================================="
+kubectl wait --for=condition=Ready pod/postgres-0 -n dev --timeout=120s
 kubectl exec -it postgres-0 -n dev -- psql -U postgres -d itemsdb -c "
 CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
@@ -90,16 +97,9 @@ SELECT * FROM (VALUES
 WHERE NOT EXISTS (SELECT 1 FROM items);
 "
 
-# Frontend
-kubectl apply -f frontend-deployment.yaml
-kubectl apply -f frontend-service.yaml
-
-# Ingress
-kubectl apply -f app-ingress.yaml
-
 echo "=================================================="
 echo "== Done. Current state: =="
 echo "=================================================="
 kubectl get all -n dev
 kubectl get pvc -n dev
-
+kubectl get resourcequota -n dev
