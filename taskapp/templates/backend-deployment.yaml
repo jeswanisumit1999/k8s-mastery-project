@@ -8,11 +8,11 @@ metadata:
     env: dev
     version: v1
   annotations:
-    owner: "Sumit Jeswani"
+    owner: "your-name"
     description: "Backend API for K8s mastery project"
     repo: "https://github.com/jeswanisumit1999/k8s-mastery-project"
 spec:
-  replicas: 2
+  replicas: {{ .Values.backend.replicas }}
   selector:
     matchLabels:
       app: backend
@@ -52,7 +52,7 @@ spec:
             memory: "128Mi"
       containers:
       - name: backend
-        image: docker.io/library/k8s-demo-backend:v1
+        image: {{ .Values.backend.image }}
         imagePullPolicy: Never
         envFrom:
         - configMapRef:
