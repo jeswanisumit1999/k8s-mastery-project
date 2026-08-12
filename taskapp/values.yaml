@@ -1,0 +1,7 @@
+namespace: dev
+backend:
+  replicas: 3
+  image: docker.io/library/k8s-demo-backend:v1
+frontend:
+  replicas: 3
+  image: docker.io/library/k8s-demo-frontend:v1
