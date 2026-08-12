@@ -6,7 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  replicas: 2
+  replicas: {{ .Values.frontend.replicas }}
   selector:
     matchLabels:
       app: frontend
@@ -19,7 +19,7 @@ spec:
         kubernetes.io/hostname: node01
       containers:
       - name: frontend
-        image: docker.io/library/k8s-demo-frontend:v1
+        image: {{ .Values.frontend.image }}
         imagePullPolicy: Never
         ports:
         - containerPort: 80
